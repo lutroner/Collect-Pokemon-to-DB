@@ -64,6 +64,8 @@ def show_pokemon(request, pokemon_id):
     pokemon['img_url'] = request.build_absolute_uri(pokemons.image.url)
     pokemon['title_ru'] = pokemons.title
     pokemon['description'] = pokemons.description
+    pokemon['title_en'] = pokemons.title_en
+    pokemon['title_jp'] = pokemons.title_jp
     # for pokemon in pokemons:
     #     if pokemon['pokemon_id'] == int(pokemon_id):
     #         requested_pokemon = pokemon
