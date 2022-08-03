@@ -45,7 +45,7 @@ def show_all_pokemons(request):
         pokemons_on_page.append({
             'pokemon_id': pokemon.id,
             'img_url': request.build_absolute_uri(pokemon.image.url),
-            'title_ru': pokemon.title,
+            'title_ru': pokemon.title
         })
 
     return render(request, 'mainpage.html', context={
@@ -58,23 +58,31 @@ def show_pokemon(request, pokemon_id):
     pokemon = {}
     pokemons = Pokemon.objects.get(id=pokemon_id)
     pokemon_entity = PokemonEntity.objects.get(id=pokemon_id)
-    # with open('pokemon_entities/pokemons.json', encoding='utf-8') as database:
-    #     pokemons = json.load(database)['pokemons']
     pokemon['pokemon_id'] = pokemons.id
     pokemon['img_url'] = request.build_absolute_uri(pokemons.image.url)
     pokemon['title_ru'] = pokemons.title
     pokemon['description'] = pokemons.description
     pokemon['title_en'] = pokemons.title_en
     pokemon['title_jp'] = pokemons.title_jp
-    # for pokemon in pokemons:
-    #     if pokemon['pokemon_id'] == int(pokemon_id):
-    #         requested_pokemon = pokemon
-    #         break
-    # else:
-    #     return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
+    try:
+        pokemon['previous_evolution'] = {
+            'title_ru': pokemons.evolved_from.title,
+            'pokemon_id': pokemons.evolved_from.id,
+            'img_url': request.build_absolute_uri(pokemons.evolved_from.image.url)
+        }
+    except AttributeError:
+        pass
+    try:
+        next_evolution = pokemons.next_evolution.all().first()
+        pokemon['next_evolution'] = {
+            'title_ru': next_evolution.title,
+            'pokemon_id': next_evolution.id,
+            'img_url': request.build_absolute_uri(next_evolution.image.url)
+        }
+    except AttributeError as e:
+        print(e)
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    # for pokemon_entity in requested_pokemon['entities']:
     add_pokemon(
         folium_map, pokemon_entity.lat,
         pokemon_entity.lon,
