@@ -1,9 +1,8 @@
 import folium
-import json
 from .models import Pokemon, PokemonEntity
-from django.http import HttpResponseNotFound
 from django.shortcuts import render
 from django.utils.timezone import localtime
+import logging
 
 MOSCOW_CENTER = [55.751244, 37.618423]
 DEFAULT_IMAGE_URL = (
@@ -11,6 +10,7 @@ DEFAULT_IMAGE_URL = (
     '/latest/fixed-aspect-ratio-down/width/240/height/240?cb=20130525215832'
     '&fill=transparent'
 )
+logging.basicConfig(level=logging.DEBUG)
 
 
 def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
@@ -27,8 +27,6 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
 
 
 def show_all_pokemons(request):
-    # with open('pokemon_entities/pokemons.json', encoding='utf-8') as database:
-    #     pokemons = json.load(database)['pokemons']
     pokemons_db = Pokemon.objects.all()
     current_pokemons = PokemonEntity.objects.filter(appeared_at__lt=localtime(), disappeared_at__gt=localtime())
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
@@ -71,7 +69,7 @@ def show_pokemon(request, pokemon_id):
             'img_url': request.build_absolute_uri(pokemons.evolved_from.image.url)
         }
     except AttributeError:
-        pass
+        logging.info(f'У покемона {pokemons.title} нет предка')
     try:
         next_evolution = pokemons.next_evolution.all().first()
         pokemon['next_evolution'] = {
@@ -79,8 +77,8 @@ def show_pokemon(request, pokemon_id):
             'pokemon_id': next_evolution.id,
             'img_url': request.build_absolute_uri(next_evolution.image.url)
         }
-    except AttributeError as e:
-        print(e)
+    except AttributeError:
+        logging.info(f'У покемона {pokemons.title} нет потомка')
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     add_pokemon(
