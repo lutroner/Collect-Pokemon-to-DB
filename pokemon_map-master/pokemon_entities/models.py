@@ -9,7 +9,7 @@ class Pokemon(models.Model):
     title_en = models.CharField('Имя(англ)', max_length=200, blank=True)
     title_jp = models.CharField('Имя(япон)', max_length=200, blank=True)
     image = models.ImageField('Изображение', blank=True)
-    description = models.TextField('Описание', default='')
+    description = models.TextField('Описание')
     evolved_from = models.ForeignKey('self', on_delete=models.PROTECT, null=True, blank=True,
                                      verbose_name='Из кого эволюционирует',
                                      related_name='next_evolution')
